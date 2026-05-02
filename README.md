@@ -4,23 +4,15 @@ A dataset of SEC EDGAR filings for 5 major public companies, intended as a knowl
 
 ## Data
 
-**747 MB** of HTML filings across 5 companies, covering **2015–2026**.
+Filings are downloaded from [SEC EDGAR](https://www.sec.gov/developer) and stored locally under `data/`. The repository does not include the data — see [`scripts/README.md`](scripts/README.md) to download it.
 
-| Company | Folder |
-|---|---|
-| Apple | `data/apple/` |
-| Microsoft | `data/microsoft/` |
-| Amazon | `data/amazon/` |
-| Alphabet (Google) | `data/alphabet/` |
-| Berkshire Hathaway | `data/berkshire/` |
-
-Each company folder is organized as:
+Once downloaded, files are organized as:
 
 ```
 data/<company>/<FORM_TYPE>/<accession-number>/<filename>.htm
 ```
 
-**Form types included:**
+**Form types:**
 - `10-K` — Annual report (full year financials + MD&A)
 - `10-Q` — Quarterly report (Q1, Q2, Q3)
 - `8-K` — Current report (material events, filed as they happen)
