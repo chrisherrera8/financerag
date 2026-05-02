@@ -26,29 +26,47 @@ data/<company>/<FORM_TYPE>/<accession-number>/<filename>.htm
 - `8-K` — Current report (material events, filed as they happen)
 - `DEF_14A` — Proxy statement (executive compensation, board votes)
 
-## Scripts
+## Environment Setup
 
-### `scripts/download_filings.py`
+### Prerequisites
 
-Downloads filings from the [SEC EDGAR API](https://www.sec.gov/developer) for all configured companies.
+- [uv](https://docs.astral.sh/uv/) for Python package management
+- [podman-compose](https://github.com/containers/podman-compose) for running containers
 
-**Usage:**
+### Python dependencies
+
 ```bash
-python scripts/download_filings.py
+uv venv
+uv pip install -r requirements.txt
 ```
 
-Already-downloaded files are skipped automatically, so re-running is safe.
+### Database (Postgres + pgvector + pgAdmin)
 
-**Key settings at the top of the script:**
+Start the services:
 
-| Variable | Default | Description |
+```bash
+podman-compose up -d
+```
+
+| Service | URL | Credentials |
 |---|---|---|
-| `COMPANIES` | 5 companies | List of `{name, slug, cik}` dicts — add/remove companies here |
-| `EARLIEST_DATE` | `"2015-01-01"` | How far back to go |
-| `TARGET_FORMS` | 10-K, 10-Q, 8-K, DEF 14A | Which filing types to download |
-| `MAX_PER_FORM` | `None` | Cap per form type per company (`None` = no limit) |
+| Postgres | `localhost:5432` | user: `financerag` / pass: `financerag` / db: `financerag` |
+| pgAdmin | http://localhost:5050 | email: `admin@financerag.local` / pass: `admin` |
 
-**EDGAR API rules followed:**
-- `User-Agent` header set (required by EDGAR)
-- Max ~8 requests/sec (EDGAR limit is 10)
-- No authentication required
+To connect pgAdmin to the database after first login: add a new server with host `postgres`, port `5432`, and the credentials above.
+
+Stop and remove containers (data volumes are preserved):
+
+```bash
+podman-compose down
+```
+
+To also wipe all stored data:
+
+```bash
+podman-compose down -v
+```
+
+## Scripts
+
+See [`scripts/README.md`](scripts/README.md) for documentation on the available scripts.
