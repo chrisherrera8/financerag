@@ -32,9 +32,9 @@ uv venv
 uv pip install -r requirements.txt
 ```
 
-### Database (Postgres + pgvector + pgAdmin)
+### Services (Postgres + pgvector + Neo4j + pgAdmin)
 
-Start the services:
+Start all services:
 
 ```bash
 podman-compose up -d
@@ -44,6 +44,8 @@ podman-compose up -d
 |---|---|---|
 | Postgres | `localhost:5432` | user: `financerag` / pass: `financerag` / db: `financerag` |
 | pgAdmin | http://localhost:5050 | email: `admin@financerag.local` / pass: `admin` |
+| Neo4j Browser | http://localhost:7474 | user: `neo4j` / pass: `financerag` |
+| Neo4j Bolt | `bolt://localhost:7687` | same credentials |
 
 To connect pgAdmin to the database after first login: add a new server with host `postgres`, port `5432`, and the credentials above.
 
@@ -59,13 +61,23 @@ To also wipe all stored data:
 podman-compose down -v
 ```
 
-### Run migrations
+### Run Postgres migrations
 
 With the database running, apply all schema migrations:
 
 ```bash
 uv run alembic upgrade head
 ```
+
+### Initialize Neo4j schema and seed data
+
+With Neo4j running, apply constraints/indexes and load static company and relationship data:
+
+```bash
+uv run python scripts/init_neo4j.py
+```
+
+This creates uniqueness constraints and indexes for all node labels, seeds the five `Company` nodes, and seeds `COMPETITOR_OF` and `OWNS_SUBSIDIARY` relationships from `config/companies.json`. The script is idempotent — safe to re-run.
 
 ## Scripts
 

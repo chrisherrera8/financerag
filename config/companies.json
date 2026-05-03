@@ -1,0 +1,61 @@
+{
+  "companies": [
+    {
+      "ticker": "AAPL",
+      "name": "Apple Inc.",
+      "sector": "Technology",
+      "fiscal_year_end": "last_saturday_september"
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft Corporation",
+      "sector": "Technology",
+      "fiscal_year_end": "june_30"
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "sector": "Consumer Discretionary",
+      "fiscal_year_end": "december_31"
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "sector": "Communication Services",
+      "fiscal_year_end": "december_31"
+    },
+    {
+      "ticker": "BRK.B",
+      "name": "Berkshire Hathaway Inc.",
+      "sector": "Financials",
+      "fiscal_year_end": "december_31"
+    }
+  ],
+  "competitor_relationships": [
+    {"from": "AAPL", "to": "MSFT", "segment": "personal computing"},
+    {"from": "AAPL", "to": "GOOGL", "segment": "mobile OS"},
+    {"from": "MSFT", "to": "GOOGL", "segment": "cloud"},
+    {"from": "MSFT", "to": "AMZN", "segment": "cloud"},
+    {"from": "AMZN", "to": "MSFT", "segment": "cloud"},
+    {"from": "AMZN", "to": "GOOGL", "segment": "cloud"},
+    {"from": "GOOGL", "to": "AMZN", "segment": "cloud"},
+    {"from": "GOOGL", "to": "MSFT", "segment": "cloud"}
+  ],
+  "subsidiary_relationships": [
+    {"parent": "AMZN", "subsidiary": "AWS", "since_year": 2006, "ownership_pct": 100},
+    {"parent": "AMZN", "subsidiary": "Whole Foods Market", "since_year": 2017, "ownership_pct": 100},
+    {"parent": "AMZN", "subsidiary": "Twitch", "since_year": 2014, "ownership_pct": 100},
+    {"parent": "GOOGL", "subsidiary": "YouTube", "since_year": 2006, "ownership_pct": 100},
+    {"parent": "GOOGL", "subsidiary": "Waymo", "since_year": 2016, "ownership_pct": 100},
+    {"parent": "GOOGL", "subsidiary": "DeepMind", "since_year": 2014, "ownership_pct": 100},
+    {"parent": "MSFT", "subsidiary": "LinkedIn", "since_year": 2016, "ownership_pct": 100},
+    {"parent": "MSFT", "subsidiary": "GitHub", "since_year": 2018, "ownership_pct": 100},
+    {"parent": "MSFT", "subsidiary": "Activision Blizzard", "since_year": 2023, "ownership_pct": 100},
+    {"parent": "AAPL", "subsidiary": "Beats Electronics", "since_year": 2014, "ownership_pct": 100},
+    {"parent": "BRK.B", "subsidiary": "GEICO", "since_year": 1996, "ownership_pct": 100},
+    {"parent": "BRK.B", "subsidiary": "BNSF Railway", "since_year": 2010, "ownership_pct": 100},
+    {"parent": "BRK.B", "subsidiary": "Berkshire Hathaway Energy", "since_year": 1999, "ownership_pct": 92},
+    {"parent": "BRK.B", "subsidiary": "Dairy Queen", "since_year": 1997, "ownership_pct": 100},
+    {"parent": "BRK.B", "subsidiary": "Duracell", "since_year": 2016, "ownership_pct": 100}
+  ]
+}

@@ -16,3 +16,4 @@ lxml>=5.2
 python-dotenv>=1.0
 pydantic>=2.7
 pydantic-settings>=2.3
+neo4j>=5.0
