@@ -59,6 +59,14 @@ To also wipe all stored data:
 podman-compose down -v
 ```
 
+### Run migrations
+
+With the database running, apply all schema migrations:
+
+```bash
+uv run alembic upgrade head
+```
+
 ## Scripts
 
 See [`scripts/README.md`](scripts/README.md) for documentation on the available scripts.
