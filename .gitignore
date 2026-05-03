@@ -4,3 +4,4 @@ sec_edgar.md
 local_files/*
 .env
 .coverage
+**/__pycache__
