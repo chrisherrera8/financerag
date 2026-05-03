@@ -3,3 +3,4 @@ data/*
 sec_edgar.md
 local_files/*
 .env
+.coverage

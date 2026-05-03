@@ -23,6 +23,7 @@ class IngestionLog(Base):
     )
     chunk_count: Mapped[int | None] = mapped_column(Integer)
     content_hash: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="PENDING")
     ingested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

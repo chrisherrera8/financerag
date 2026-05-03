@@ -11,9 +11,12 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-target_metadata = None
+from db.base import Base
+import db.models  # noqa: F401 – registers all models with Base
+
+target_metadata = Base.metadata
 
 db_url = os.environ.get("DATABASE_URL")
 if db_url:
