@@ -1,6 +1,5 @@
 data/*
 !data/.gitkeep
 sec_edgar.md
-PRD.md
-feature_list.md
+local_files/*
 .env
