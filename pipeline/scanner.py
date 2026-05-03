@@ -1,3 +1,5 @@
+"""Scan the data directory for SEC filing HTM files and classify them for ingestion."""
+
 import hashlib
 import logging
 from pathlib import Path
@@ -13,6 +15,7 @@ Status = Literal["NEW", "SKIPPED", "HASH_MISMATCH"]
 
 
 def _sha256(path: Path) -> str:
+    """Return the hex-encoded SHA-256 digest of a file, read in 64 KiB chunks."""
     h = hashlib.sha256()
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(65536), b""):
@@ -23,7 +26,19 @@ def _sha256(path: Path) -> str:
 def scan_data_directory(
     data_dir: Path, session: Session
 ) -> list[tuple[str, str, Status]]:
-    """Walk data_dir for *.htm files and return (file_path, hash, status) tuples."""
+    """Walk *data_dir* recursively for ``*.htm`` files and classify each one.
+
+    Compares the file's SHA-256 hash against the ``ingestion_log`` table to
+    determine whether the file is new, unchanged, or has been modified.
+
+    Args:
+        data_dir: Root directory to search (e.g. ``data/``).
+        session: Active SQLAlchemy session used to query ``ingestion_log``.
+
+    Returns:
+        A list of ``(file_path, content_hash, status)`` tuples sorted by path.
+        ``status`` is one of ``"NEW"``, ``"SKIPPED"``, or ``"HASH_MISMATCH"``.
+    """
     results: list[tuple[str, str, Status]] = []
 
     for htm_file in sorted(data_dir.rglob("*.htm")):
