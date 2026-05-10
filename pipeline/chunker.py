@@ -1,11 +1,14 @@
 """Split a Section's plain text into token-bounded paragraph-level Chunk objects."""
 
+import logging
 import re
 from dataclasses import dataclass
 
 import tiktoken
 
 from pipeline.sectioner import Section
+
+log = logging.getLogger(__name__)
 
 _ENC = tiktoken.get_encoding("cl100k_base")
 
@@ -75,6 +78,7 @@ def _split_at_sentence_boundary(text: str, max_tokens: int) -> tuple[str, str]:
                 tail = " ".join(head_words[last_period_idx + 1 :] + words[i + 1 :])
             else:
                 # No sentence boundary found — split at the word before cap
+                log.debug("No sentence boundary found before token cap; falling back to word split")
                 head = " ".join(head_words[:-1])
                 tail = " ".join([head_words[-1]] + words[i + 1 :])
             return head.strip(), tail.strip()
@@ -104,10 +108,13 @@ def _is_list(block: str) -> bool:
 
 def _chunk_table(block: str, section_name: str, section_order: int) -> list[Chunk]:
     """Split a pipe-delimited table into Chunk objects respecting the 800-token hard cap."""
-    if _tokens(block) <= _TABLE_HARD_CAP:
-        return [Chunk(text=block, token_count=_tokens(block),
+    tok = _tokens(block)
+    if tok <= _TABLE_HARD_CAP:
+        log.debug("Table fits in one chunk (%d tokens) [%s]", tok, section_name)
+        return [Chunk(text=block, token_count=tok,
                       section_name=section_name, section_order=section_order)]
 
+    log.debug("Table exceeds hard cap (%d tokens); splitting by row [%s]", tok, section_name)
     rows = block.splitlines()
     chunks: list[Chunk] = []
     current_rows: list[str] = []
@@ -132,10 +139,13 @@ def _chunk_table(block: str, section_name: str, section_order: int) -> list[Chun
 
 def _chunk_list(block: str, section_name: str, section_order: int) -> list[Chunk]:
     """Split a bullet list into Chunk objects at item boundaries."""
-    if _tokens(block) <= _PARAGRAPH_TARGET_MAX:
-        return [Chunk(text=block, token_count=_tokens(block),
+    tok = _tokens(block)
+    if tok <= _PARAGRAPH_TARGET_MAX:
+        log.debug("List fits in one chunk (%d tokens) [%s]", tok, section_name)
+        return [Chunk(text=block, token_count=tok,
                       section_name=section_name, section_order=section_order)]
 
+    log.debug("List exceeds target max (%d tokens); splitting by item [%s]", tok, section_name)
     items = block.splitlines()
     chunks: list[Chunk] = []
     current_items: list[str] = []
@@ -162,6 +172,10 @@ def _chunk_paragraph(text: str, section_name: str, section_order: int) -> list[C
     """Split a plain-text paragraph into ≤400-token Chunk objects at sentence boundaries."""
     chunks: list[Chunk] = []
     remaining = text.strip()
+    total_tokens = _tokens(remaining)
+
+    if total_tokens > _PARAGRAPH_TARGET_MAX:
+        log.debug("Paragraph exceeds target max (%d tokens); splitting [%s]", total_tokens, section_name)
 
     while remaining:
         if _tokens(remaining) <= _PARAGRAPH_TARGET_MAX:
@@ -171,6 +185,7 @@ def _chunk_paragraph(text: str, section_name: str, section_order: int) -> list[C
         head, tail = _split_at_sentence_boundary(remaining, _PARAGRAPH_TARGET_MAX)
         if not head:
             # Degenerate case: single word > cap; emit it and continue.
+            log.warning("Degenerate paragraph block (single token exceeds cap) [%s]", section_name)
             head = remaining
             tail = ""
         chunks.append(Chunk(text=head, token_count=_tokens(head),
@@ -265,6 +280,7 @@ def chunk_section(section: Section) -> list[Chunk]:
         into each successive chunk.
     """
     if not section.text:
+        log.debug("Skipping empty section [%s]", section.section_name)
         return []
 
     name = section.section_name
@@ -275,17 +291,28 @@ def chunk_section(section: Section) -> list[Chunk]:
     blocks = [b.strip() for b in raw_blocks if b.strip()]
 
     if not blocks:
+        log.debug("No non-empty blocks after splitting [%s]", name)
         return []
+
+    log.debug("Chunking section %r (order=%d): %d block(s)", name, order, len(blocks))
 
     chunks: list[Chunk] = []
     for block in blocks:
         if _is_table(block):
+            log.debug("Block classified as table (%d chars) [%s]", len(block), name)
             chunks.extend(_chunk_table(block, name, order))
         elif _is_list(block):
+            log.debug("Block classified as list (%d chars) [%s]", len(block), name)
             chunks.extend(_chunk_list(block, name, order))
         else:
             chunks.extend(_chunk_paragraph(block, name, order))
 
+    before_merge = len(chunks)
     chunks = _merge_undersize(chunks)
+    after_merge = len(chunks)
+    if before_merge != after_merge:
+        log.debug("Merged undersize chunks: %d → %d [%s]", before_merge, after_merge, name)
+
     chunks = _add_overlap(chunks)
+    log.debug("Section %r produced %d final chunk(s)", name, len(chunks))
     return chunks
