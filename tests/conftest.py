@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
+from tests.fixtures.chunk_fixtures import make_paragraph_chunk  # noqa: F401
+
 import psycopg
 import pytest
 from alembic import command

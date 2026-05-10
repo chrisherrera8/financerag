@@ -39,6 +39,7 @@ class Chunk:
     token_count: int = 0
     section_name: str = ""
     section_order: int = 0
+    parent_paragraph_text: str = ""
 
 
 def _tokens(text: str) -> int:
